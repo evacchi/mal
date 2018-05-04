@@ -1,16 +1,20 @@
-package mal.step0_repl;
+package mal.step1_read_print;
 
 public class Main {
 
-    String READ(String input) { return input; }
-    String EVAL(String input) { return input; }
+    MalType READ(String input) { return Reader.fromString(input); }
+    String EVAL(MalType input) { return input.toString(); }
     String PRINT(String input) { return input; }
 
     void rep() {
         var console = System.console();
         String input = console.readLine("user> ");
         while (input != null) {
-            System.out.println(PRINT(EVAL(READ(input))));
+            try {
+                System.out.println(PRINT(EVAL(READ(input))));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             input = console.readLine("user> ");
         }
     }
