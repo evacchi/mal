@@ -10,17 +10,8 @@ public class Main {
     MalType EVAL(MalType input, Env env) {
         return Match(input).of(
                 Case($(instanceOf(MalList.class).and(MalList::isEmpty)), identity()),
-                Case($(instanceOf(MalList.class)), l -> evalAst(l, env).apply()),
-                Case($(), any -> evalAst(any, env)));
-    }
-
-
-    public MalType evalAst(MalType type, Env env) {
-        return Match(type).of(
-                Case($(instanceOf(Symbol.class)), env::lookup),
                 Case($(instanceOf(MalList.class)), l ->
-                        new MalList(l.value.map(v -> EVAL(v, env)))),
-                Case($(instanceOf(MalFunction.class)), f -> { throw new UnsupportedOperationException("not yet"); }),
+                     new MalList(l.value.map(v -> EVAL(v, env))).apply(env)),
                 Case($(), identity())
         );
     }

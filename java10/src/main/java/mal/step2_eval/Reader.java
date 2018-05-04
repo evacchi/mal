@@ -8,9 +8,6 @@ import java.util.regex.Pattern;
 
 import io.vavr.collection.List;
 
-import static io.vavr.API.*;
-import static io.vavr.Predicates.*;
-
 import static java.util.stream.Collectors.joining;
 
 enum Token {
@@ -113,18 +110,10 @@ public class Reader {
         return new MalList(types);
     }
 
-    private MalType form(Reader r) {
-        QualifiedToken tok = r.peek();
-        if (tok.token == Token.LeftParen) {
-            return list();
-        } else {
-            return atom();
-        }
-    }
 }
 
 abstract class MalType {
-    public MalType apply() {
+    public MalType apply(Env env) {
         throw new UnsupportedOperationException(this.getClass().getCanonicalName());
     }
 }
@@ -180,9 +169,9 @@ final class MalList extends MalType {
                 .map(MalType::toString)
                 .collect(joining(" ", "(", ")"));
     }
-    public MalType apply() {
-        return Match(value.head()).of(
-                Case($(instanceOf(MalFunction.class)), f -> f.apply(value.tail())));
+    public MalType apply(Env env) {
+        var fn = (MalFunction) env.lookup(value.head());
+        return fn.apply(value.tail());
     }
 }
 
