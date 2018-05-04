@@ -1,11 +1,12 @@
-package mal.step1_read_print;
+package mal.step2_eval;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import io.vavr.collection.List;
 
 import static java.util.stream.Collectors.joining;
 
@@ -30,6 +31,7 @@ enum Token {
                 null;
     }
 }
+
 class QualifiedToken {
     final Token token;
     final String value;
@@ -60,7 +62,7 @@ public class Reader {
     }
 
     static List<QualifiedToken> tokenize(String input) {
-        var tokens = new ArrayList<QualifiedToken>();
+        var tokens = List.<QualifiedToken>empty();
         while (!input.isEmpty()) {
             String current = input;
             QualifiedToken matched = Arrays.stream(Token.values())
@@ -70,7 +72,7 @@ public class Reader {
                     .get();
             input = input.substring(matched.value.length());
             if (matched.token.ignored) continue;
-            tokens.add(matched);
+            tokens = tokens.append(matched);
         }
         return tokens;
     }
@@ -99,10 +101,10 @@ public class Reader {
     }
 
     private MalType list() {
-        var types = new ArrayList<MalType>();
+        var types = List.<MalType>empty();
         this.next(); // discard LeftParen
         while (this.peek().token != Token.RightParen) {
-            types.add(form());
+            types = types.append(form());
         }
         next(); // discard RightParen
         return new MalList(types);
@@ -118,7 +120,11 @@ public class Reader {
     }
 }
 
-abstract class MalType {}
+abstract class MalType {
+    public MalType apply(List<MalType> args) {
+        throw new UnsupportedOperationException();
+    }
+}
 
 abstract class Atom extends MalType {}
 
@@ -144,19 +150,46 @@ final class Symbol extends Atom {
     public String toString() {
         return value;
     }
+
+    @Override
+    public int hashCode() {
+        return value.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Symbol && value.equals(((Symbol)obj).value);
+    }
 }
 
 final class MalList extends MalType {
-    List<MalType> value;
+    final List<MalType> value;
     public MalList(List<MalType> value) {
         this.value = value;
+    }
+    public boolean isEmpty() {
+        return value.isEmpty();
     }
 
     @Override
     public String toString() {
-        return value.stream()
+        return value
                 .map(MalType::toString)
                 .collect(joining(" ", "(", ")"));
     }
 }
+
+final class MalFunction extends MalType {
+    private final Function<List<MalType>, MalType> value;
+
+    public MalFunction(Function<List<MalType>, MalType> value) {
+        this.value = value;
+    }
+
+    public MalType apply(List<MalType> args) {
+        return value.apply(args);
+    }
+}
+
+
 

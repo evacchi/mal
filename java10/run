@@ -6,4 +6,4 @@ if [ "$#" -gt 0 ]; then
         args="$args '$a'"
     done
 fi
-mvn -quiet compile exec:java -Dexec.mainClass="mal.${STEP:-stepA_mal}.Main" -Dexec.args="$args"
+mvn compile exec:java -Dexec.mainClass="mal.${STEP:-stepA_mal}.Main" -Dexec.args="$args"
