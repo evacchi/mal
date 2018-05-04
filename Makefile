@@ -80,7 +80,7 @@ DOCKERIZE =
 
 IMPLS = ada awk bash basic c chuck clojure coffee common-lisp cpp crystal cs d dart \
 	elisp elixir elm erlang es6 factor forth fsharp go groovy gst guile haskell \
-	haxe hy io java js julia kotlin livescript logo lua make mal matlab miniMAL \
+	haxe hy io java java10 js julia kotlin livescript logo lua make mal matlab miniMAL \
 	nasm nim objc objpascal ocaml perl perl6 php pil plpgsql plsql powershell ps \
 	python r racket rexx rpython ruby rust scala scheme skew swift swift3 tcl \
 	ts vb vhdl vimscript yorick
@@ -202,6 +202,7 @@ haxe_STEP_TO_PROG =    $(haxe_STEP_TO_PROG_$(haxe_MODE))
 hy_STEP_TO_PROG =      hy/$($(1)).hy
 io_STEP_TO_PROG =      io/$($(1)).io
 java_STEP_TO_PROG =    java/target/classes/mal/$($(1)).class
+java10_STEP_TO_PROG =  java10/target/classes/mal/$($(1))/Main.class
 js_STEP_TO_PROG =      js/$($(1)).js
 julia_STEP_TO_PROG =   julia/$($(1)).jl
 kotlin_STEP_TO_PROG =  kotlin/$($(1)).jar
