@@ -2,7 +2,7 @@ package mal.step1_read_print;
 
 public class Main {
 
-    MalType READ(String input) { return Reader.fromString(input); }
+    MalType READ(String input) { return Reader.fromString(input).form(); }
     String EVAL(MalType input) { return input.toString(); }
     String PRINT(String input) { return input; }
 

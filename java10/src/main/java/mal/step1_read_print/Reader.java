@@ -8,6 +8,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.reducing;
 
 enum Token {
     WhiteSpace("[\\s,]+", true),
@@ -45,9 +46,18 @@ public class Reader {
     private final List<QualifiedToken> tokens;
     private int position;
 
-    public static MalType fromString(String input) {
+    public static Reader fromString(String input) {
         var tokens = tokenize(input);
-        return readForm(new Reader(tokens));
+        return new Reader(tokens);
+    }
+
+    public MalType form() {
+        QualifiedToken tok = this.peek();
+        if (tok.token == Token.LeftParen) {
+            return list();
+        } else {
+            return atom();
+        }
     }
 
     static List<QualifiedToken> tokenize(String input) {
@@ -71,18 +81,17 @@ public class Reader {
         this.position = 0;
     }
 
-    public QualifiedToken next() {
+    private QualifiedToken next() {
         return tokens.get(position++);
     }
 
-    public QualifiedToken peek() {
+    private QualifiedToken peek() {
         return tokens.get(position);
     }
 
 
-
-    private static MalType readAtom(Reader r) {
-        var token = r.next();
+    private MalType atom() {
+        var token = next();
         try {
             return new Number(Integer.parseInt(token.value));
         } catch (NumberFormatException e) {
@@ -90,22 +99,22 @@ public class Reader {
         }
     }
 
-    private static MalType readList(Reader r) {
+    private MalType list() {
         var types = new ArrayList<MalType>();
-        r.next(); // discard LeftParen
-        while (r.peek().token != Token.RightParen) {
-            types.add(readForm(r));
+        this.next(); // discard LeftParen
+        while (this.peek().token != Token.RightParen) {
+            types.add(form());
         }
-        r.next(); // discard RightParen
+        next(); // discard RightParen
         return new MalList(types);
     }
 
-    static MalType readForm(Reader r) {
+    private MalType form(Reader r) {
         QualifiedToken tok = r.peek();
         if (tok.token == Token.LeftParen) {
-            return readList(r);
+            return list();
         } else {
-            return readAtom(r) ;
+            return atom();
         }
     }
 }
@@ -146,7 +155,9 @@ final class MalList extends MalType {
 
     @Override
     public String toString() {
-        return value.toString();//value.stream().map(MalType::toString).collect(joining(" ", "(", ")"));
+        return value.stream()
+                .map(MalType::toString)
+                .collect(joining(" ", "(", ")"));
     }
 }
 
